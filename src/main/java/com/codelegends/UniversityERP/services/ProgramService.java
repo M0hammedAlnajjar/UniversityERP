@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 
@@ -58,5 +59,13 @@ public class ProgramService {
     public List<Program> getAllPrograms() {
 
         return programRepository.findAllByIsActiveTrue();
+    }
+    public Optional<Program> getProgramById(Long id) {
+
+        if (id == null) {
+            return Optional.empty();
+        }
+
+        return programRepository.findByIdAndIsActiveTrue(id);
     }
 }
