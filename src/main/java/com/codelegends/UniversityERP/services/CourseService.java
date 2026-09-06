@@ -1,17 +1,18 @@
 package com.codelegends.UniversityERP.services;
 
-
-import com.codelegends.UniversityERP.repositories.CourseRepository;
-import org.springframework.stereotype.Service;
 import com.codelegends.UniversityERP.entities.Course;
 import com.codelegends.UniversityERP.entities.Instructor;
 import com.codelegends.UniversityERP.entities.Program;
-import java.util.List;
+import com.codelegends.UniversityERP.repositories.CourseRepository;
+import org.springframework.stereotype.Service;
+
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class CourseService {
+
     private final CourseRepository courseRepository;
     private final ProgramService programService;
     private final InstructorService instructorService;
@@ -91,6 +92,7 @@ public class CourseService {
 
         return courseRepository.findAllByIsActiveTrue();
     }
+
     public Optional<Course> getCourseById(Long id) {
 
         if (id == null) {
@@ -100,4 +102,99 @@ public class CourseService {
         return courseRepository.findByIdAndIsActiveTrue(id);
     }
 
+    public Optional<Course> updateCourse(
+            Long id,
+            Course course
+    ) {
+
+        if (id == null || course == null) {
+            return Optional.empty();
+        }
+
+        Optional<Course> existingCourse =
+                courseRepository.findByIdAndIsActiveTrue(id);
+
+        if (existingCourse.isEmpty()) {
+            return Optional.empty();
+        }
+
+        if (courseRepository.existsByCourseCodeAndIdNot(
+                course.getCourseCode(),
+                id
+        )) {
+            throw new IllegalArgumentException(
+                    "Course code already exists"
+            );
+        }
+
+        Course courseToUpdate = existingCourse.get();
+
+        courseToUpdate.setTitle(course.getTitle());
+        courseToUpdate.setCourseCode(course.getCourseCode());
+        courseToUpdate.setCreditHours(
+                course.getCreditHours()
+        );
+
+        if (course.getProgram() != null
+                && course.getProgram().getId() > 0) {
+
+            Program program = programService
+                    .getProgramById(
+                            course.getProgram().getId()
+                    )
+                    .orElseThrow(
+                            () -> new IllegalArgumentException(
+                                    "Active program not found"
+                            )
+                    );
+
+            courseToUpdate.setProgram(program);
+        }
+
+        if (course.getInstructor() != null
+                && course.getInstructor().getId() > 0) {
+
+            Instructor instructor = instructorService
+                    .getInstructorById(
+                            course.getInstructor().getId()
+                    )
+                    .orElseThrow(
+                            () -> new IllegalArgumentException(
+                                    "Active instructor not found"
+                            )
+                    );
+
+            courseToUpdate.setInstructor(instructor);
+        }
+
+        courseToUpdate.setUpdatedDate(new Date());
+
+        Course updatedCourse =
+                courseRepository.save(courseToUpdate);
+
+        return Optional.of(updatedCourse);
+    }
+
+    public boolean softDeleteCourse(Long id) {
+
+        if (id == null) {
+            return false;
+        }
+
+        Optional<Course> existingCourse =
+                courseRepository.findByIdAndIsActiveTrue(id);
+
+        if (existingCourse.isEmpty()) {
+            return false;
+        }
+
+        Course course = existingCourse.get();
+
+        course.setActive(false);
+        course.setUpdatedDate(new Date());
+
+        courseRepository.save(course);
+
+        return true;
+    }
 }
