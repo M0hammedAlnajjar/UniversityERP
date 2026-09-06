@@ -76,4 +76,64 @@ public class InstructorService {
 
         return instructorRepository.findByIdAndIsActiveTrue(id);
     }
+    public Optional<Instructor> updateInstructor(
+            Long id,
+            Instructor instructor
+    ) {
+
+        if (id == null || instructor == null) {
+            return Optional.empty();
+        }
+
+        Optional<Instructor> existingInstructor =
+                instructorRepository.findByIdAndIsActiveTrue(id);
+
+        if (existingInstructor.isEmpty()) {
+            return Optional.empty();
+        }
+
+        if (instructorRepository.existsByEmailAndIdNot(
+                instructor.getEmail(),
+                id
+        )) {
+            throw new IllegalArgumentException(
+                    "Instructor email already exists"
+            );
+        }
+
+        Instructor instructorToUpdate =
+                existingInstructor.get();
+
+        instructorToUpdate.setName(instructor.getName());
+        instructorToUpdate.setEmail(instructor.getEmail());
+        instructorToUpdate.setPhoneNumber(
+                instructor.getPhoneNumber()
+        );
+        instructorToUpdate.setSpecialization(
+                instructor.getSpecialization()
+        );
+
+        if (instructor.getDepartment() != null
+                && instructor.getDepartment().getId() > 0) {
+
+            Department department = departmentService
+                    .getDepartmentById(
+                            instructor.getDepartment().getId()
+                    )
+                    .orElseThrow(
+                            () -> new IllegalArgumentException(
+                                    "Active department not found"
+                            )
+                    );
+
+            instructorToUpdate.setDepartment(department);
+        }
+
+        instructorToUpdate.setUpdatedDate(new Date());
+
+        Instructor updatedInstructor =
+                instructorRepository.save(instructorToUpdate);
+
+        return Optional.of(updatedInstructor);
+    }
 }
