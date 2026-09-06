@@ -16,6 +16,9 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
 
     boolean existsByEnrollment_IdAndExam_IdAndIsActiveTrue(Long enrollmentId, Long examId);
 
+    @Query("select g from Grade g where g.enrollment.student.id = :studentId and g.isActive = true")
+    List<Grade> findActiveGradesByStudentId(@Param("studentId") Long studentId);
+
     @Query("select avg(g.score) from Grade g where g.exam.course.id = :courseId and g.isActive = true")
     Double findAverageScoreByCourseId(@Param("courseId") Long courseId);
 
