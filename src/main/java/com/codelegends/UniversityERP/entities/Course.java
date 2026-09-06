@@ -38,4 +38,7 @@ public class Course extends BaseClass {
 
     @OneToMany(mappedBy = "course")
     private List<Enrollment> enrollments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "course")
+    private List<Exam> exams = new ArrayList<>();
 }
