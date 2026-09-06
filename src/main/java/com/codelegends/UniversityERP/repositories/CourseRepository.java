@@ -34,4 +34,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     @Query("select c from Course c where c.isActive = true and not exists (select e.id from Enrollment e where e.course = c and e.isActive = true)")
     List<Course> findActiveCoursesWithNoEnrollments();
+
+    @Query("select c.instructor.id, c.instructor.name, sum(c.creditHours) from Course c where c.instructor is not null and c.isActive = true and c.instructor.isActive = true group by c.instructor.id, c.instructor.name order by sum(c.creditHours) desc")
+    List<Object[]> findInstructorCreditHoursRanking();
 }
