@@ -4,8 +4,9 @@ import com.codelegends.UniversityERP.repositories.FacultyRepository;
 import org.springframework.stereotype.Service;
 import com.codelegends.UniversityERP.entities.Faculty;
 import com.codelegends.UniversityERP.entities.University;
-
+import java.util.List;
 import java.util.Date;
+
 @Service
 public class FacultyService {
     private final FacultyRepository facultyRepository;
@@ -48,6 +49,10 @@ public class FacultyService {
         faculty.setCreatedDate(new Date());
 
         return facultyRepository.save(faculty);
+    }
+    public List<Faculty> getAllFaculties() {
+
+        return facultyRepository.findAllByIsActiveTrue();
     }
 
 }
