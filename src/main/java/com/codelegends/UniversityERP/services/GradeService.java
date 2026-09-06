@@ -102,4 +102,64 @@ public class GradeService {
 
         return gradeRepository.findByIdAndIsActiveTrue(id);
     }
+
+    public Optional<Grade> updateGrade(Long id, Grade grade) {
+        if (id == null || id <= 0 || grade == null) {
+            return Optional.empty();
+        }
+
+        Optional<Grade> existingGrade =
+                gradeRepository.findByIdAndIsActiveTrue(id);
+
+        if (existingGrade.isEmpty()) {
+            return Optional.empty();
+        }
+
+        if (grade.getScore() == null || grade.getScore() < 0) {
+            throw new IllegalArgumentException(
+                    "Grade score must be zero or greater"
+            );
+        }
+
+        if (grade.getLetterGrade() == null
+                || grade.getLetterGrade().isBlank()) {
+            throw new IllegalArgumentException(
+                    "Letter grade is required"
+            );
+        }
+
+        Grade gradeToUpdate = existingGrade.get();
+        gradeToUpdate.setScore(grade.getScore());
+        gradeToUpdate.setLetterGrade(grade.getLetterGrade());
+
+        if (grade.getEnrollment() != null
+                && grade.getEnrollment().getId() > 0) {
+            Enrollment enrollment = enrollmentService
+                    .getEnrollmentById(grade.getEnrollment().getId())
+                    .orElseThrow(
+                            () -> new IllegalArgumentException(
+                                    "Active enrollment not found"
+                            )
+                    );
+            gradeToUpdate.setEnrollment(enrollment);
+        }
+
+        if (grade.getExam() != null
+                && grade.getExam().getId() > 0) {
+            Exam exam = examService
+                    .getExamById(grade.getExam().getId())
+                    .orElseThrow(
+                            () -> new IllegalArgumentException(
+                                    "Active exam not found"
+                            )
+                    );
+            gradeToUpdate.setExam(exam);
+        }
+
+        gradeToUpdate.setUpdatedDate(new Date());
+
+        return Optional.of(
+                gradeRepository.save(gradeToUpdate)
+        );
+    }
 }
