@@ -6,6 +6,7 @@ import com.codelegends.UniversityERP.entities.Department;
 import com.codelegends.UniversityERP.entities.Faculty;
 import java.util.List;
 import java.util.Date;
+import java.util.Optional;
 @Service
 
 public class DepartmentService {
@@ -55,5 +56,13 @@ public class DepartmentService {
     public List<Department> getAllDepartments() {
 
         return departmentRepository.findAllByIsActiveTrue();
+    }
+    public Optional<Department> getDepartmentById(Long id) {
+
+        if (id == null) {
+            return Optional.empty();
+        }
+
+        return departmentRepository.findByIdAndIsActiveTrue(id);
     }
 }
