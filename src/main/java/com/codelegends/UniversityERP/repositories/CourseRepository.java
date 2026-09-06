@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface CourseRepository extends JpaRepository<Course, Long> {
     List<Course> findAllByIsActiveTrue();
     Optional<Course> findByIdAndIsActiveTrue(Long id);
+    boolean existsByCourseCode(String courseCode);
 }
