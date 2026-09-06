@@ -101,4 +101,27 @@ public class StudentService {
 
         return Optional.of(updatedStudent);
     }
+    public boolean softDeleteStudent(Long id) {
+
+        if (id == null) {
+            return false;
+        }
+
+        Optional<Student> existingStudent =
+                studentRepository.findByIdAndIsActiveTrue(id);
+
+        if (existingStudent.isEmpty()) {
+            return false;
+        }
+
+        Student student = existingStudent.get();
+
+        student.setActive(false);
+        student.setUpdatedDate(new Date());
+
+        studentRepository.save(student);
+
+        return true;
+    }
+
 }
