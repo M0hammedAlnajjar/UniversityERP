@@ -93,4 +93,26 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
         return Optional.of(updatedCourse);
     }
+    public boolean softDeleteCourse(Long id) {
+
+        if (id == null) {
+            return false;
+        }
+
+        Optional<Course> existingCourse =
+                courseRepository.findByIdAndIsActiveTrue(id);
+
+        if (existingCourse.isEmpty()) {
+            return false;
+        }
+
+        Course course = existingCourse.get();
+
+        course.setActive(false);
+        course.setUpdatedDate(new Date());
+
+        courseRepository.save(course);
+
+        return true;
+    }
 }
