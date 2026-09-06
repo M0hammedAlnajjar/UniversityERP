@@ -1,7 +1,12 @@
 package com.codelegends.UniversityERP.controllers;
 
+import com.codelegends.UniversityERP.dto.DepartmentDTO;
 import com.codelegends.UniversityERP.entities.Department;
+import com.codelegends.UniversityERP.entities.Faculty;
+import com.codelegends.UniversityERP.exceptions.ResourceNotFoundException;
 import com.codelegends.UniversityERP.services.DepartmentService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,50 +23,48 @@ public class DepartmentController {
     }
 
     @PostMapping
-    public ResponseEntity<Department> createDepartment(
-            @RequestBody Department department
-    ) {
-        return ResponseEntity.ok(
-                departmentService.createDepartment(department)
-        );
+    public ResponseEntity<DepartmentDTO> createDepartment(@Valid @RequestBody DepartmentDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(DepartmentDTO.convertToDTO(departmentService.createDepartment(toEntity(dto))));
     }
 
     @GetMapping
-    public ResponseEntity<List<Department>> getAllDepartments() {
-        return ResponseEntity.ok(
-                departmentService.getAllDepartments()
-        );
+    public ResponseEntity<List<DepartmentDTO>> getAllDepartments() {
+        return ResponseEntity.ok(DepartmentDTO.convertToDTO(departmentService.getAllDepartments()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Department> getDepartmentById(
-            @PathVariable Long id
-    ) {
-        return departmentService.getDepartmentById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<DepartmentDTO> getDepartmentById(@PathVariable Long id) {
+        Department department = departmentService.getDepartmentById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + id));
+        return ResponseEntity.ok(DepartmentDTO.convertToDTO(department));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Department> updateDepartment(
+    public ResponseEntity<DepartmentDTO> updateDepartment(
             @PathVariable Long id,
-            @RequestBody Department department
+            @Valid @RequestBody DepartmentDTO dto
     ) {
-        return departmentService.updateDepartment(id, department)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        Department updated = departmentService.updateDepartment(id, toEntity(dto))
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + id));
+        return ResponseEntity.ok(DepartmentDTO.convertToDTO(updated));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDepartment(
-            @PathVariable Long id
-    ) {
-        boolean deleted = departmentService.softDeleteDepartment(id);
-
-        if (!deleted) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
+        if (!departmentService.softDeleteDepartment(id)) {
+            throw new ResourceNotFoundException("Department not found with id: " + id);
         }
-
         return ResponseEntity.noContent().build();
+    }
+
+    private Department toEntity(DepartmentDTO dto) {
+        Department department = new Department();
+        department.setName(dto.getName());
+        department.setDescription(dto.getDescription());
+        Faculty faculty = new Faculty();
+        faculty.setId(dto.getFacultyId());
+        department.setFaculty(faculty);
+        return department;
     }
 }
