@@ -1,11 +1,15 @@
 package com.codelegends.UniversityERP.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.catalina.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 public class Instructor extends BaseClass {
+
     @Column(length = 100, nullable = false)
     private String name;
 
@@ -31,9 +36,6 @@ public class Instructor extends BaseClass {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id", nullable = false)
     private Department department;
-
-    @OneToMany(mappedBy = "department")
-    private List<Classroom> classrooms = new ArrayList<>();
 
     @OneToMany(mappedBy = "instructor")
     private List<Course> courses = new ArrayList<>();
