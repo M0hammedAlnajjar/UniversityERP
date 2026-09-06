@@ -1,10 +1,13 @@
 package com.codelegends.UniversityERP.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,4 +22,12 @@ public class Guardian extends BaseClass{
 
     @Column(length = 20, nullable = false)
     private String phoneNumber;
+
+    @OneToMany(mappedBy = "student")
+    private List<Guardian> guardians = new ArrayList<>();
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private Student student;
 }
