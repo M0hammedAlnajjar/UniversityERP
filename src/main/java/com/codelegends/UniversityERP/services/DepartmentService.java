@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import com.codelegends.UniversityERP.repositories.DepartmentRepository;
 import com.codelegends.UniversityERP.entities.Department;
 import com.codelegends.UniversityERP.entities.Faculty;
-
+import java.util.List;
 import java.util.Date;
 @Service
 
@@ -51,5 +51,9 @@ public class DepartmentService {
         department.setCreatedDate(new Date());
 
         return departmentRepository.save(department);
+    }
+    public List<Department> getAllDepartments() {
+
+        return departmentRepository.findAllByIsActiveTrue();
     }
 }
