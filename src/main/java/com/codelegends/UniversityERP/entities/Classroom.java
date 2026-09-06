@@ -6,21 +6,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
 public class Classroom extends BaseClass {
 
-    @Column(length = 100, nullable = false)
-    private String title;
+    @Column(length = 20, nullable = false, unique = true)
+    private String roomNumber;
 
     @Column(nullable = false)
-    private LocalDate examDate;
+    private Integer floor;
 
     @Column(nullable = false)
-    private Double totalMarks;
+    private Integer capacity;
+
 
 }
