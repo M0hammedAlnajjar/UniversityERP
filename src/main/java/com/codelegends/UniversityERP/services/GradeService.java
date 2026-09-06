@@ -162,4 +162,24 @@ public class GradeService {
                 gradeRepository.save(gradeToUpdate)
         );
     }
+
+    public boolean softDeleteGrade(Long id) {
+        if (id == null || id <= 0) {
+            return false;
+        }
+
+        Optional<Grade> existingGrade =
+                gradeRepository.findByIdAndIsActiveTrue(id);
+
+        if (existingGrade.isEmpty()) {
+            return false;
+        }
+
+        Grade grade = existingGrade.get();
+        grade.setActive(false);
+        grade.setUpdatedDate(new Date());
+        gradeRepository.save(grade);
+
+        return true;
+    }
 }
