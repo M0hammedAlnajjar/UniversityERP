@@ -7,6 +7,7 @@ import com.codelegends.UniversityERP.repositories.ProgramRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 
@@ -53,5 +54,9 @@ public class ProgramService {
         program.setCreatedDate(new Date());
 
         return programRepository.save(program);
+    }
+    public List<Program> getAllPrograms() {
+
+        return programRepository.findAllByIsActiveTrue();
     }
 }
