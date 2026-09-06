@@ -2,6 +2,8 @@ package com.codelegends.UniversityERP.services;
 
 import com.codelegends.UniversityERP.entities.Program;
 import com.codelegends.UniversityERP.entities.Student;
+import com.codelegends.UniversityERP.enums.EnrollmentStatus;
+import com.codelegends.UniversityERP.exceptions.ResourceNotFoundException;
 import com.codelegends.UniversityERP.repositories.StudentRepository;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +30,7 @@ public class StudentService {
             throw new IllegalArgumentException("Program ID is required");
         }
         Program program = programService.getProgramById(student.getProgram().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Active program not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Active program not found"));
         student.setProgram(program);
         student.setActive(true);
         student.setCreatedDate(new Date());
@@ -39,7 +41,7 @@ public class StudentService {
         if (courseId == null || courseId <= 0) {
             throw new IllegalArgumentException("Valid course ID is required");
         }
-        return studentRepository.findActiveStudentsByCourseId(courseId);
+        return studentRepository.findActiveStudentsByCourseId(courseId, EnrollmentStatus.ENROLLED);
     }
 
     public long countStudentsByUniversity(Long universityId) {
@@ -75,7 +77,7 @@ public class StudentService {
                 throw new IllegalArgumentException("Valid program ID is required");
             }
             Program program = programService.getProgramById(student.getProgram().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Active program not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Active program not found"));
             studentToUpdate.setProgram(program);
         }
         studentToUpdate.setName(student.getName());
