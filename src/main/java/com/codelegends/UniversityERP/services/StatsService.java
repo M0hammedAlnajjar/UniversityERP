@@ -81,6 +81,7 @@ public class StatsService {
                         EnrollmentStatus.ENROLLED
                 ))
                 .averageScore(gradeService.getProgramAverageScore(programId))
+                .averageGpa(gradeService.getProgramAverageGpa(programId))
                 .build();
     }
 }
