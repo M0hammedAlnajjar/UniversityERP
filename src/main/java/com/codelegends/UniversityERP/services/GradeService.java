@@ -108,6 +108,18 @@ public class GradeService {
         return average == null ? 0.0 : round(average);
     }
 
+    public Double getProgramAverageGpa(Long programId) {
+        programService.getProgramById(programId)
+                .orElseThrow(() -> new ResourceNotFoundException("Active program not found"));
+        List<Grade> grades = gradeRepository.findActiveGradesByProgramId(programId);
+        if (grades.isEmpty()) return 0.0;
+        double averageGpa = grades.stream()
+                .mapToDouble(g -> gpaFromPercentage((g.getScore() / g.getExam().getTotalMarks()) * 100.0))
+                .average()
+                .orElse(0.0);
+        return round(averageGpa);
+    }
+
     public TopStudentDTO getTopStudentByProgram(Long programId) {
         programService.getProgramById(programId)
                 .orElseThrow(() -> new ResourceNotFoundException("Active program not found"));
