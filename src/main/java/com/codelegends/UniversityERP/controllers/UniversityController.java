@@ -1,7 +1,11 @@
 package com.codelegends.UniversityERP.controllers;
 
+import com.codelegends.UniversityERP.dto.UniversityDTO;
 import com.codelegends.UniversityERP.entities.University;
+import com.codelegends.UniversityERP.exceptions.ResourceNotFoundException;
 import com.codelegends.UniversityERP.services.UniversityService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,50 +22,44 @@ public class UniversityController {
     }
 
     @PostMapping
-    public ResponseEntity<University> createUniversity(
-            @RequestBody University university
-    ) {
-        return ResponseEntity.ok(
-                universityService.createUniversity(university)
-        );
+    public ResponseEntity<UniversityDTO> createUniversity(@Valid @RequestBody UniversityDTO dto) {
+        University university = new University();
+        university.setName(dto.getName());
+        university.setLocation(dto.getLocation());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(UniversityDTO.convertToDTO(universityService.createUniversity(university)));
     }
 
     @GetMapping
-    public ResponseEntity<List<University>> getAllUniversities() {
-        return ResponseEntity.ok(
-                universityService.getAllUniversities()
-        );
+    public ResponseEntity<List<UniversityDTO>> getAllUniversities() {
+        return ResponseEntity.ok(UniversityDTO.convertToDTO(universityService.getAllUniversities()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<University> getUniversityById(
-            @PathVariable Long id
-    ) {
-        return universityService.getUniversityById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<UniversityDTO> getUniversityById(@PathVariable Long id) {
+        University university = universityService.getUniversityById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("University not found with id: " + id));
+        return ResponseEntity.ok(UniversityDTO.convertToDTO(university));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<University> updateUniversity(
+    public ResponseEntity<UniversityDTO> updateUniversity(
             @PathVariable Long id,
-            @RequestBody University university
+            @Valid @RequestBody UniversityDTO dto
     ) {
-        return universityService.updateUniversity(id, university)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        University university = new University();
+        university.setName(dto.getName());
+        university.setLocation(dto.getLocation());
+        University updated = universityService.updateUniversity(id, university)
+                .orElseThrow(() -> new ResourceNotFoundException("University not found with id: " + id));
+        return ResponseEntity.ok(UniversityDTO.convertToDTO(updated));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUniversity(
-            @PathVariable Long id
-    ) {
-        boolean deleted = universityService.softDeleteUniversity(id);
-
-        if (!deleted) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<Void> deleteUniversity(@PathVariable Long id) {
+        if (!universityService.softDeleteUniversity(id)) {
+            throw new ResourceNotFoundException("University not found with id: " + id);
         }
-
         return ResponseEntity.noContent().build();
     }
 }
