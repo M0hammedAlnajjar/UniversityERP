@@ -14,4 +14,5 @@ public class ProgramStatsDTO {
     private String programName;
     private Long totalEnrolledStudents;
     private Double averageScore;
+    private Double averageGpa;
 }
