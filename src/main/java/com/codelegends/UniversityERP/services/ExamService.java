@@ -6,6 +6,7 @@ import com.codelegends.UniversityERP.repositories.ExamRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class ExamService {
@@ -52,5 +53,9 @@ public class ExamService {
         exam.setCreatedDate(new Date());
 
         return examRepository.save(exam);
+    }
+    public List<Exam> getAllExams() {
+
+        return examRepository.findAllByIsActiveTrue();
     }
 }
