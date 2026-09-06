@@ -8,6 +8,7 @@ import com.codelegends.UniversityERP.exceptions.ResourceNotFoundException;
 import com.codelegends.UniversityERP.repositories.ClassroomRepository;
 import com.codelegends.UniversityERP.repositories.EnrollmentRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class EnrollmentService {
 
     private final EnrollmentRepository enrollmentRepository;
