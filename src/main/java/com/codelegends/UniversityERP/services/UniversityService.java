@@ -71,4 +71,27 @@ public class UniversityService {
 
         return Optional.of(updatedUniversity);
     }
+    public boolean softDeleteUniversity(Long id) {
+
+        if (id == null) {
+            return false;
+        }
+
+        Optional<University> existingUniversity =
+                universityRepository.findByIdAndIsActiveTrue(id);
+
+        if (existingUniversity.isEmpty()) {
+            return false;
+        }
+
+        University university =
+                existingUniversity.get();
+
+        university.setActive(false);
+        university.setUpdatedDate(new Date());
+
+        universityRepository.save(university);
+
+        return true;
+    }
 }
