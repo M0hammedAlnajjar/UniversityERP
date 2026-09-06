@@ -112,4 +112,26 @@ public class DepartmentService {
 
         return Optional.of(updatedDepartment);
     }
+    public boolean softDeleteDepartment(Long id) {
+
+        if (id == null) {
+            return false;
+        }
+
+        Optional<Department> existingDepartment =
+                departmentRepository.findByIdAndIsActiveTrue(id);
+
+        if (existingDepartment.isEmpty()) {
+            return false;
+        }
+
+        Department department = existingDepartment.get();
+
+        department.setActive(false);
+        department.setUpdatedDate(new Date());
+
+        departmentRepository.save(department);
+
+        return true;
+    }
 }
