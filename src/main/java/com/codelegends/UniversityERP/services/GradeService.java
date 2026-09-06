@@ -7,6 +7,7 @@ import com.codelegends.UniversityERP.repositories.GradeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class GradeService {
@@ -87,5 +88,9 @@ public class GradeService {
         grade.setCreatedDate(new Date());
 
         return gradeRepository.save(grade);
+    }
+
+    public List<Grade> getAllGrades() {
+        return gradeRepository.findAllByIsActiveTrue();
     }
 }
