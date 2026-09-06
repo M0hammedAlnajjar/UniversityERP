@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,4 +24,6 @@ public class Faculty extends BaseClass {
     @JoinColumn(name = "university_id", nullable = false)
     private University university;
 
+    @OneToMany(mappedBy = "faculty")
+    private List<Department> departments = new ArrayList<>();
 }
