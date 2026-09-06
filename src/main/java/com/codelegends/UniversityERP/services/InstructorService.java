@@ -136,4 +136,26 @@ public class InstructorService {
 
         return Optional.of(updatedInstructor);
     }
+    public boolean softDeleteInstructor(Long id) {
+
+        if (id == null) {
+            return false;
+        }
+
+        Optional<Instructor> existingInstructor =
+                instructorRepository.findByIdAndIsActiveTrue(id);
+
+        if (existingInstructor.isEmpty()) {
+            return false;
+        }
+
+        Instructor instructor = existingInstructor.get();
+
+        instructor.setActive(false);
+        instructor.setUpdatedDate(new Date());
+
+        instructorRepository.save(instructor);
+
+        return true;
+    }
 }
