@@ -43,4 +43,32 @@ public class UniversityService {
 
         return universityRepository.findByIdAndIsActiveTrue(id);
     }
+    public Optional<University> updateUniversity(
+            Long id,
+            University university
+    ) {
+
+        if (id == null || university == null) {
+            return Optional.empty();
+        }
+
+        Optional<University> existingUniversity =
+                universityRepository.findByIdAndIsActiveTrue(id);
+
+        if (existingUniversity.isEmpty()) {
+            return Optional.empty();
+        }
+
+        University universityToUpdate =
+                existingUniversity.get();
+
+        universityToUpdate.setName(university.getName());
+        universityToUpdate.setLocation(university.getLocation());
+        universityToUpdate.setUpdatedDate(new Date());
+
+        University updatedUniversity =
+                universityRepository.save(universityToUpdate);
+
+        return Optional.of(updatedUniversity);
+    }
 }
