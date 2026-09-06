@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import com.codelegends.UniversityERP.entities.University;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+
 
 @Service
 public class UniversityService {
@@ -31,5 +33,14 @@ public class UniversityService {
     public List<University> getAllUniversities() {
 
         return universityRepository.findAllByIsActiveTrue();
+    }
+
+    public Optional<University> getUniversityById(Long id) {
+
+        if (id == null) {
+            return Optional.empty();
+        }
+
+        return universityRepository.findByIdAndIsActiveTrue(id);
     }
 }
