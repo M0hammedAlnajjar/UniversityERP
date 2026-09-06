@@ -44,10 +44,7 @@ public class BusinessController {
     }
 
     @PostMapping("/enrollments")
-    public ResponseEntity<EnrollmentDTO> enrollStudent(
-            @RequestParam Long studentId,
-            @RequestParam Long courseId
-    ) {
+    public ResponseEntity<EnrollmentDTO> enrollStudent(@RequestParam Long studentId, @RequestParam Long courseId) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(EnrollmentDTO.convertToDTO(enrollmentService.enrollStudent(studentId, courseId)));
     }
@@ -63,10 +60,7 @@ public class BusinessController {
     }
 
     @PutMapping("/courses/{courseId}/instructor/{instructorId}")
-    public ResponseEntity<CourseDTO> assignInstructor(
-            @PathVariable Long courseId,
-            @PathVariable Long instructorId
-    ) {
+    public ResponseEntity<CourseDTO> assignInstructor(@PathVariable Long courseId, @PathVariable Long instructorId) {
         return ResponseEntity.ok(CourseDTO.convertToDTO(courseService.assignInstructor(courseId, instructorId)));
     }
 
@@ -76,10 +70,7 @@ public class BusinessController {
     }
 
     @PostMapping("/courses/{courseId}/exams")
-    public ResponseEntity<ExamDTO> scheduleExam(
-            @PathVariable Long courseId,
-            @Valid @RequestBody ExamScheduleDTO request
-    ) {
+    public ResponseEntity<ExamDTO> scheduleExam(@PathVariable Long courseId, @Valid @RequestBody ExamScheduleDTO request) {
         Exam exam = new Exam();
         exam.setTitle(request.getTitle());
         exam.setExamDate(request.getExamDate());
@@ -87,8 +78,7 @@ public class BusinessController {
         Course course = new Course();
         course.setId(courseId);
         exam.setCourse(course);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ExamDTO.convertToDTO(examService.createExam(exam)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ExamDTO.convertToDTO(examService.createExam(exam)));
     }
 
     @GetMapping("/courses/{courseId}/exams")
@@ -111,8 +101,7 @@ public class BusinessController {
         Exam exam = new Exam();
         exam.setId(examId);
         grade.setExam(exam);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(GradeDTO.convertToDTO(gradeService.createGrade(grade)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(GradeDTO.convertToDTO(gradeService.createGrade(grade)));
     }
 
     @GetMapping("/students/{studentId}/performance")
@@ -158,5 +147,19 @@ public class BusinessController {
     @GetMapping("/courses/no-enrollments")
     public ResponseEntity<List<CourseDTO>> getCoursesWithNoEnrollments() {
         return ResponseEntity.ok(CourseDTO.convertToDTO(courseService.getCoursesWithNoEnrollments()));
+    }
+
+    @GetMapping("/instructors/top-credit-hours")
+    public ResponseEntity<InstructorCreditHoursDTO> getTopInstructorByCreditHours() {
+        return ResponseEntity.ok(courseService.getTopInstructorByCreditHours());
+    }
+
+    @GetMapping("/programs/{programId}/average-gpa")
+    public ResponseEntity<MetricDTO> getProgramAverageGpa(@PathVariable Long programId) {
+        return ResponseEntity.ok(MetricDTO.builder()
+                .entityId(programId)
+                .metric("averageGpa")
+                .value(gradeService.getProgramAverageGpa(programId))
+                .build());
     }
 }
