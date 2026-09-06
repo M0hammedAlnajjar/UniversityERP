@@ -28,6 +28,6 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
     @Query("select avg(g.score) from Grade g where g.enrollment.student.program.id = :programId and g.isActive = true")
     Double findAverageScoreByProgramId(@Param("programId") Long programId);
 
-    @Query("select g.enrollment.student.id, g.enrollment.student.name, avg(g.score) as avgScore from Grade g where g.enrollment.student.program.id = :programId and g.isActive = true group by g.enrollment.student.id, g.enrollment.student.name order by avgScore desc")
+    @Query("select g.enrollment.student.id, g.enrollment.student.name, avg(g.score) from Grade g where g.enrollment.student.program.id = :programId and g.isActive = true group by g.enrollment.student.id, g.enrollment.student.name order by avg(g.score) desc")
     List<Object[]> findStudentAverageRankingByProgramId(@Param("programId") Long programId);
 }
