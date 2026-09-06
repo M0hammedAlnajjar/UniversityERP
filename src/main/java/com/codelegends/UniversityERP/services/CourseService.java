@@ -1,5 +1,6 @@
 package com.codelegends.UniversityERP.services;
 
+import com.codelegends.UniversityERP.dto.InstructorCreditHoursDTO;
 import com.codelegends.UniversityERP.entities.Course;
 import com.codelegends.UniversityERP.entities.Instructor;
 import com.codelegends.UniversityERP.entities.Program;
@@ -26,49 +27,37 @@ public class CourseService {
 
     public Course createCourse(Course course) {
         if (course == null) throw new IllegalArgumentException("Course cannot be null");
-        if (courseRepository.existsByCourseCode(course.getCourseCode())) {
-            throw new IllegalArgumentException("Course code already exists");
-        }
-        if (course.getProgram() == null || course.getProgram().getId() <= 0) {
-            throw new IllegalArgumentException("Program ID is required");
-        }
+        if (courseRepository.existsByCourseCode(course.getCourseCode())) throw new IllegalArgumentException("Course code already exists");
+        if (course.getProgram() == null || course.getProgram().getId() <= 0) throw new IllegalArgumentException("Program ID is required");
         Program program = programService.getProgramById(course.getProgram().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Active program not found"));
         course.setProgram(program);
-
         if (course.getInstructor() != null) {
-            if (course.getInstructor().getId() <= 0) {
-                throw new IllegalArgumentException("Valid instructor ID is required");
-            }
+            if (course.getInstructor().getId() <= 0) throw new IllegalArgumentException("Valid instructor ID is required");
             Instructor instructor = instructorService.getInstructorById(course.getInstructor().getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Active instructor not found"));
             course.setInstructor(instructor);
         }
-
         course.setActive(true);
         course.setCreatedDate(new Date());
         return courseRepository.save(course);
     }
 
     public Course assignInstructor(Long courseId, Long instructorId) {
-        Course course = getCourseById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Active course not found"));
-        Instructor instructor = instructorService.getInstructorById(instructorId)
-                .orElseThrow(() -> new ResourceNotFoundException("Active instructor not found"));
+        Course course = getCourseById(courseId).orElseThrow(() -> new ResourceNotFoundException("Active course not found"));
+        Instructor instructor = instructorService.getInstructorById(instructorId).orElseThrow(() -> new ResourceNotFoundException("Active instructor not found"));
         course.setInstructor(instructor);
         course.setUpdatedDate(new Date());
         return courseRepository.save(course);
     }
 
     public List<Course> getCoursesByInstructor(Long instructorId) {
-        instructorService.getInstructorById(instructorId)
-                .orElseThrow(() -> new ResourceNotFoundException("Active instructor not found"));
+        instructorService.getInstructorById(instructorId).orElseThrow(() -> new ResourceNotFoundException("Active instructor not found"));
         return courseRepository.findActiveCoursesByInstructorId(instructorId);
     }
 
     public List<Course> getCoursesByProgram(Long programId) {
-        programService.getProgramById(programId)
-                .orElseThrow(() -> new ResourceNotFoundException("Active program not found"));
+        programService.getProgramById(programId).orElseThrow(() -> new ResourceNotFoundException("Active program not found"));
         return courseRepository.findActiveCoursesByProgramId(programId);
     }
 
@@ -81,9 +70,21 @@ public class CourseService {
     }
 
     public long countCoursesByInstructor(Long instructorId) {
-        instructorService.getInstructorById(instructorId)
-                .orElseThrow(() -> new ResourceNotFoundException("Active instructor not found"));
+        instructorService.getInstructorById(instructorId).orElseThrow(() -> new ResourceNotFoundException("Active instructor not found"));
         return courseRepository.countActiveCoursesByInstructorId(instructorId);
+    }
+
+    public InstructorCreditHoursDTO getTopInstructorByCreditHours() {
+        List<Object[]> ranking = courseRepository.findInstructorCreditHoursRanking();
+        if (ranking.isEmpty()) {
+            return InstructorCreditHoursDTO.builder().totalCreditHours(0L).build();
+        }
+        Object[] row = ranking.getFirst();
+        return InstructorCreditHoursDTO.builder()
+                .instructorId(((Number) row[0]).longValue())
+                .instructorName((String) row[1])
+                .totalCreditHours(((Number) row[2]).longValue())
+                .build();
     }
 
     public List<Course> getAllCourses() {
@@ -99,26 +100,19 @@ public class CourseService {
         if (id == null || id <= 0 || course == null) return Optional.empty();
         Optional<Course> existingCourse = courseRepository.findByIdAndIsActiveTrue(id);
         if (existingCourse.isEmpty()) return Optional.empty();
-        if (courseRepository.existsByCourseCodeAndIdNot(course.getCourseCode(), id)) {
-            throw new IllegalArgumentException("Course code already exists");
-        }
-
+        if (courseRepository.existsByCourseCodeAndIdNot(course.getCourseCode(), id)) throw new IllegalArgumentException("Course code already exists");
         Course courseToUpdate = existingCourse.get();
         courseToUpdate.setTitle(course.getTitle());
         courseToUpdate.setCourseCode(course.getCourseCode());
         courseToUpdate.setCreditHours(course.getCreditHours());
-
         if (course.getProgram() != null && course.getProgram().getId() > 0) {
-            Program program = programService.getProgramById(course.getProgram().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Active program not found"));
+            Program program = programService.getProgramById(course.getProgram().getId()).orElseThrow(() -> new ResourceNotFoundException("Active program not found"));
             courseToUpdate.setProgram(program);
         }
         if (course.getInstructor() != null && course.getInstructor().getId() > 0) {
-            Instructor instructor = instructorService.getInstructorById(course.getInstructor().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Active instructor not found"));
+            Instructor instructor = instructorService.getInstructorById(course.getInstructor().getId()).orElseThrow(() -> new ResourceNotFoundException("Active instructor not found"));
             courseToUpdate.setInstructor(instructor);
         }
-
         courseToUpdate.setUpdatedDate(new Date());
         return Optional.of(courseRepository.save(courseToUpdate));
     }
