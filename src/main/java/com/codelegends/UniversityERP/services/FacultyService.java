@@ -6,6 +6,7 @@ import com.codelegends.UniversityERP.entities.Faculty;
 import com.codelegends.UniversityERP.entities.University;
 import java.util.List;
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class FacultyService {
@@ -53,6 +54,14 @@ public class FacultyService {
     public List<Faculty> getAllFaculties() {
 
         return facultyRepository.findAllByIsActiveTrue();
+    }
+    public Optional<Faculty> getFacultyById(Long id) {
+
+        if (id == null) {
+            return Optional.empty();
+        }
+
+        return facultyRepository.findByIdAndIsActiveTrue(id);
     }
 
 }
