@@ -2,6 +2,10 @@ package com.codelegends.UniversityERP.services;
 
 import org.springframework.stereotype.Service;
 import com.codelegends.UniversityERP.repositories.DepartmentRepository;
+import com.codelegends.UniversityERP.entities.Department;
+import com.codelegends.UniversityERP.entities.Faculty;
+
+import java.util.Date;
 @Service
 
 public class DepartmentService {
@@ -14,5 +18,38 @@ public class DepartmentService {
     ) {
         this.departmentRepository = departmentRepository;
         this.facultyService = facultyService;
+    }
+
+    public Department createDepartment(Department department) {
+
+        if (department == null) {
+            throw new IllegalArgumentException(
+                    "Department cannot be null"
+            );
+        }
+
+        if (department.getFaculty() == null
+                || department.getFaculty().getId() <= 0) {
+
+            throw new IllegalArgumentException(
+                    "Faculty ID is required"
+            );
+        }
+
+        Faculty faculty = facultyService
+                .getFacultyById(
+                        department.getFaculty().getId()
+                )
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                "Active faculty not found"
+                        )
+                );
+
+        department.setFaculty(faculty);
+        department.setActive(true);
+        department.setCreatedDate(new Date());
+
+        return departmentRepository.save(department);
     }
 }
