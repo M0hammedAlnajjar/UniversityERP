@@ -2,8 +2,9 @@ package com.codelegends.UniversityERP.services;
 import com.codelegends.UniversityERP.entities.Program;
 import com.codelegends.UniversityERP.entities.Student;
 import org.springframework.stereotype.Service;
-
+import java.util.List;
 import java.util.Date;
+import java.util.Optional;
 @Service
 
 public class StudentService {
@@ -38,5 +39,17 @@ public class StudentService {
         student.setCreatedDate(new Date());
 
         return studentRepository.save(student);
+    }
+    public List<Student> getAllStudents() {
+
+        return studentRepository.findAllByIsActiveTrue();
+    }
+    public Optional<Student> getStudentById(Long id) {
+
+        if (id == null) {
+            return Optional.empty();
+        }
+
+        return studentRepository.findByIdAndIsActiveTrue(id);
     }
 }
