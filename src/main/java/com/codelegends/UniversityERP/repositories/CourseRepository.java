@@ -13,4 +13,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     List<Course> findAllByIsActiveTrue();
     Optional<Course> findByIdAndIsActiveTrue(Long id);
     boolean existsByCourseCode(String courseCode);
+    boolean existsByCourseCodeAndIdNot(
+            String courseCode,
+            Long id
+    );
 }
