@@ -13,4 +13,9 @@ public interface InstructorRepository extends JpaRepository<Instructor,Long> {
 
     Optional<Instructor> findByIdAndIsActiveTrue(Long id);
     boolean existsByEmail(String email);
+
+    boolean existsByEmailAndIdNot(
+            String email,
+            Long id
+    );
 }
