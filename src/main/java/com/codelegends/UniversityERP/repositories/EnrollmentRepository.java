@@ -28,12 +28,21 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @Query("select e from Enrollment e where e.status = :status and e.isActive = true")
     List<Enrollment> findActiveEnrollmentsByStatus(@Param("status") EnrollmentStatus status);
 
-    @Query("select e from Enrollment e where e.student.id = :studentId and e.status = com.codelegends.UniversityERP.enums.EnrollmentStatus.ENROLLED and e.isActive = true")
-    List<Enrollment> findActiveEnrollmentsByStudentId(@Param("studentId") Long studentId);
+    @Query("select e from Enrollment e where e.student.id = :studentId and e.status = :status and e.isActive = true")
+    List<Enrollment> findActiveEnrollmentsByStudentId(
+            @Param("studentId") Long studentId,
+            @Param("status") EnrollmentStatus status
+    );
 
-    @Query("select count(e) from Enrollment e where e.course.id = :courseId and e.status = com.codelegends.UniversityERP.enums.EnrollmentStatus.ENROLLED and e.isActive = true")
-    long countActiveEnrolledByCourseId(@Param("courseId") Long courseId);
+    @Query("select count(e) from Enrollment e where e.course.id = :courseId and e.status = :status and e.isActive = true")
+    long countActiveEnrollmentsByCourseId(
+            @Param("courseId") Long courseId,
+            @Param("status") EnrollmentStatus status
+    );
 
-    @Query("select count(distinct e.student.id) from Enrollment e where e.course.program.id = :programId and e.status = com.codelegends.UniversityERP.enums.EnrollmentStatus.ENROLLED and e.isActive = true")
-    long countDistinctActiveStudentsByProgramId(@Param("programId") Long programId);
+    @Query("select count(distinct e.student.id) from Enrollment e where e.course.program.id = :programId and e.status = :status and e.isActive = true")
+    long countDistinctActiveStudentsByProgramId(
+            @Param("programId") Long programId,
+            @Param("status") EnrollmentStatus status
+    );
 }
