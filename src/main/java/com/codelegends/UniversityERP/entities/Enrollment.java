@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @Entity
-public class Enrollment {
+public class Enrollment extends BaseClass {
     @Column(nullable = false)
     private LocalDate enrollmentDate;
 
