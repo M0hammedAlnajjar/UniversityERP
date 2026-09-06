@@ -7,6 +7,8 @@ import com.codelegends.UniversityERP.entities.Department;
 import com.codelegends.UniversityERP.entities.Instructor;
 import java.util.List;
 import java.util.Date;
+import java.util.Optional;
+
 @Service
 
 public class InstructorService {
@@ -64,5 +66,14 @@ public class InstructorService {
     public List<Instructor> getAllInstructors() {
 
         return instructorRepository.findAllByIsActiveTrue();
+    }
+
+    public Optional<Instructor> getInstructorById(Long id) {
+
+        if (id == null) {
+            return Optional.empty();
+        }
+
+        return instructorRepository.findByIdAndIsActiveTrue(id);
     }
 }
