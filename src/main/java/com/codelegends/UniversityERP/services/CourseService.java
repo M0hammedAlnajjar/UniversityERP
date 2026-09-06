@@ -8,6 +8,8 @@ import com.codelegends.UniversityERP.entities.Instructor;
 import com.codelegends.UniversityERP.entities.Program;
 import java.util.List;
 import java.util.Date;
+import java.util.Optional;
+
 @Service
 public class CourseService {
     private final CourseRepository courseRepository;
@@ -88,6 +90,14 @@ public class CourseService {
     public List<Course> getAllCourses() {
 
         return courseRepository.findAllByIsActiveTrue();
+    }
+    public Optional<Course> getCourseById(Long id) {
+
+        if (id == null) {
+            return Optional.empty();
+        }
+
+        return courseRepository.findByIdAndIsActiveTrue(id);
     }
 
 }
