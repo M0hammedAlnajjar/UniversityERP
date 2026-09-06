@@ -6,14 +6,17 @@ import com.codelegends.UniversityERP.entities.Enrollment;
 import com.codelegends.UniversityERP.entities.Exam;
 import com.codelegends.UniversityERP.entities.Grade;
 import com.codelegends.UniversityERP.entities.Student;
+import com.codelegends.UniversityERP.exceptions.ResourceNotFoundException;
 import com.codelegends.UniversityERP.repositories.GradeRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class GradeService {
 
     private final GradeRepository gradeRepository;
@@ -40,18 +43,15 @@ public class GradeService {
     }
 
     public Grade createGrade(Grade grade) {
-        if (grade == null) {
-            throw new IllegalArgumentException("Grade cannot be null");
-        }
+        if (grade == null) throw new IllegalArgumentException("Grade cannot be null");
         validateBasicGrade(grade);
 
         Enrollment enrollment = enrollmentService.getEnrollmentById(grade.getEnrollment().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Active enrollment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Active enrollment not found"));
         Exam exam = examService.getExamById(grade.getExam().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Active exam not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Active exam not found"));
 
         validateEnrollmentExamAndScore(enrollment, exam, grade.getScore());
-
         if (gradeRepository.existsByEnrollment_IdAndExam_IdAndIsActiveTrue(enrollment.getId(), exam.getId())) {
             throw new IllegalArgumentException("A grade already exists for this enrollment and exam");
         }
@@ -65,9 +65,8 @@ public class GradeService {
 
     public StudentPerformanceDTO getStudentPerformance(Long studentId) {
         Student student = studentService.getStudentById(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("Active student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Active student not found"));
         List<Grade> grades = gradeRepository.findActiveGradesByStudentId(studentId);
-
         if (grades.isEmpty()) {
             return StudentPerformanceDTO.builder()
                     .studentId(student.getId())
@@ -97,21 +96,21 @@ public class GradeService {
 
     public Double getCourseAverageScore(Long courseId) {
         courseService.getCourseById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("Active course not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Active course not found"));
         Double average = gradeRepository.findAverageScoreByCourseId(courseId);
         return average == null ? 0.0 : round(average);
     }
 
     public Double getProgramAverageScore(Long programId) {
         programService.getProgramById(programId)
-                .orElseThrow(() -> new IllegalArgumentException("Active program not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Active program not found"));
         Double average = gradeRepository.findAverageScoreByProgramId(programId);
         return average == null ? 0.0 : round(average);
     }
 
     public TopStudentDTO getTopStudentByProgram(Long programId) {
         programService.getProgramById(programId)
-                .orElseThrow(() -> new IllegalArgumentException("Active program not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Active program not found"));
         List<Object[]> ranking = gradeRepository.findStudentAverageRankingByProgramId(programId);
         if (ranking.isEmpty()) {
             return TopStudentDTO.builder().programId(programId).averageScore(0.0).build();
@@ -130,26 +129,20 @@ public class GradeService {
     }
 
     public Optional<Grade> getGradeById(Long id) {
-        if (id == null || id <= 0) {
-            return Optional.empty();
-        }
+        if (id == null || id <= 0) return Optional.empty();
         return gradeRepository.findByIdAndIsActiveTrue(id);
     }
 
     public Optional<Grade> updateGrade(Long id, Grade grade) {
-        if (id == null || id <= 0 || grade == null) {
-            return Optional.empty();
-        }
+        if (id == null || id <= 0 || grade == null) return Optional.empty();
         Optional<Grade> existingGrade = gradeRepository.findByIdAndIsActiveTrue(id);
-        if (existingGrade.isEmpty()) {
-            return Optional.empty();
-        }
+        if (existingGrade.isEmpty()) return Optional.empty();
         validateBasicGrade(grade);
 
         Enrollment enrollment = enrollmentService.getEnrollmentById(grade.getEnrollment().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Active enrollment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Active enrollment not found"));
         Exam exam = examService.getExamById(grade.getExam().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Active exam not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Active exam not found"));
         validateEnrollmentExamAndScore(enrollment, exam, grade.getScore());
 
         Grade gradeToUpdate = existingGrade.get();
@@ -162,13 +155,9 @@ public class GradeService {
     }
 
     public boolean softDeleteGrade(Long id) {
-        if (id == null || id <= 0) {
-            return false;
-        }
+        if (id == null || id <= 0) return false;
         Optional<Grade> existingGrade = gradeRepository.findByIdAndIsActiveTrue(id);
-        if (existingGrade.isEmpty()) {
-            return false;
-        }
+        if (existingGrade.isEmpty()) return false;
         Grade grade = existingGrade.get();
         grade.setActive(false);
         grade.setUpdatedDate(new Date());
@@ -177,18 +166,10 @@ public class GradeService {
     }
 
     private void validateBasicGrade(Grade grade) {
-        if (grade.getScore() == null || grade.getScore() < 0) {
-            throw new IllegalArgumentException("Grade score must be zero or greater");
-        }
-        if (grade.getLetterGrade() == null || grade.getLetterGrade().isBlank()) {
-            throw new IllegalArgumentException("Letter grade is required");
-        }
-        if (grade.getEnrollment() == null || grade.getEnrollment().getId() <= 0) {
-            throw new IllegalArgumentException("Enrollment ID is required");
-        }
-        if (grade.getExam() == null || grade.getExam().getId() <= 0) {
-            throw new IllegalArgumentException("Exam ID is required");
-        }
+        if (grade.getScore() == null || grade.getScore() < 0) throw new IllegalArgumentException("Grade score must be zero or greater");
+        if (grade.getLetterGrade() == null || grade.getLetterGrade().isBlank()) throw new IllegalArgumentException("Letter grade is required");
+        if (grade.getEnrollment() == null || grade.getEnrollment().getId() <= 0) throw new IllegalArgumentException("Enrollment ID is required");
+        if (grade.getExam() == null || grade.getExam().getId() <= 0) throw new IllegalArgumentException("Exam ID is required");
     }
 
     private void validateEnrollmentExamAndScore(Enrollment enrollment, Exam exam, Double score) {
