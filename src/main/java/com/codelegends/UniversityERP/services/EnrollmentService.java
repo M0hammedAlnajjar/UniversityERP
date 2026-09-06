@@ -4,6 +4,7 @@ import com.codelegends.UniversityERP.entities.Course;
 import com.codelegends.UniversityERP.entities.Enrollment;
 import com.codelegends.UniversityERP.entities.Student;
 import com.codelegends.UniversityERP.enums.EnrollmentStatus;
+import com.codelegends.UniversityERP.exceptions.ResourceNotFoundException;
 import com.codelegends.UniversityERP.repositories.ClassroomRepository;
 import com.codelegends.UniversityERP.repositories.EnrollmentRepository;
 import org.springframework.stereotype.Service;
@@ -45,9 +46,9 @@ public class EnrollmentService {
         }
 
         Student student = studentService.getStudentById(enrollment.getStudent().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Active student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Active student not found"));
         Course course = courseService.getCourseById(enrollment.getCourse().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Active course not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Active course not found"));
 
         if (enrollmentRepository.existsByStudent_IdAndCourse_IdAndStatusAndIsActiveTrue(
                 student.getId(), course.getId(), EnrollmentStatus.ENROLLED)) {
@@ -83,7 +84,7 @@ public class EnrollmentService {
 
     public Enrollment dropEnrollment(Long id) {
         Enrollment enrollment = getEnrollmentById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Active enrollment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Active enrollment not found"));
         enrollment.setStatus(EnrollmentStatus.DROPPED);
         enrollment.setUpdatedDate(new Date());
         return enrollmentRepository.save(enrollment);
@@ -91,8 +92,8 @@ public class EnrollmentService {
 
     public List<Course> getCoursesForStudent(Long studentId) {
         studentService.getStudentById(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("Active student not found"));
-        return enrollmentRepository.findActiveEnrollmentsByStudentId(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Active student not found"));
+        return enrollmentRepository.findActiveEnrollmentsByStudentId(studentId, EnrollmentStatus.ENROLLED)
                 .stream()
                 .map(Enrollment::getCourse)
                 .toList();
@@ -131,7 +132,7 @@ public class EnrollmentService {
                 throw new IllegalArgumentException("Valid student ID is required");
             }
             Student student = studentService.getStudentById(enrollment.getStudent().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Active student not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Active student not found"));
             enrollmentToUpdate.setStudent(student);
         }
         if (enrollment.getCourse() != null) {
@@ -139,7 +140,7 @@ public class EnrollmentService {
                 throw new IllegalArgumentException("Valid course ID is required");
             }
             Course course = courseService.getCourseById(enrollment.getCourse().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Active course not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Active course not found"));
             enrollmentToUpdate.setCourse(course);
         }
         if (enrollment.getEnrollmentDate() != null) {
@@ -173,7 +174,7 @@ public class EnrollmentService {
         if (capacity == null || capacity <= 0) {
             throw new IllegalArgumentException("No active classroom capacity is available for this course department");
         }
-        long enrolled = enrollmentRepository.countActiveEnrolledByCourseId(course.getId());
+        long enrolled = enrollmentRepository.countActiveEnrollmentsByCourseId(course.getId(), EnrollmentStatus.ENROLLED);
         if (enrolled >= capacity) {
             throw new IllegalArgumentException("Course is full");
         }
