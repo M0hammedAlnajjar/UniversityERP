@@ -5,7 +5,7 @@ import com.codelegends.UniversityERP.repositories.InstructorRepository;
 import org.springframework.stereotype.Service;
 import com.codelegends.UniversityERP.entities.Department;
 import com.codelegends.UniversityERP.entities.Instructor;
-
+import java.util.List;
 import java.util.Date;
 @Service
 
@@ -59,5 +59,10 @@ public class InstructorService {
         instructor.setCreatedDate(new Date());
 
         return instructorRepository.save(instructor);
+    }
+
+    public List<Instructor> getAllInstructors() {
+
+        return instructorRepository.findAllByIsActiveTrue();
     }
 }
