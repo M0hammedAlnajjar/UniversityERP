@@ -1,10 +1,8 @@
 package com.codelegends.UniversityERP.entities;
 
 import com.codelegends.UniversityERP.enums.DegreeLevel;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,4 +22,9 @@ public class Program extends BaseClass{
 
     @Column(nullable = false)
     private Integer durationYears;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
 }
