@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import com.codelegends.UniversityERP.entities.Course;
 import com.codelegends.UniversityERP.entities.Instructor;
 import com.codelegends.UniversityERP.entities.Program;
-
+import java.util.List;
 import java.util.Date;
 @Service
 public class CourseService {
@@ -83,6 +83,11 @@ public class CourseService {
         course.setCreatedDate(new Date());
 
         return courseRepository.save(course);
+    }
+
+    public List<Course> getAllCourses() {
+
+        return courseRepository.findAllByIsActiveTrue();
     }
 
 }
