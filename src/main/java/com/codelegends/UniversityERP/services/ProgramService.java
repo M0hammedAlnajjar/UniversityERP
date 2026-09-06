@@ -68,4 +68,53 @@ public class ProgramService {
 
         return programRepository.findByIdAndIsActiveTrue(id);
     }
+    public Optional<Program> updateProgram(
+            Long id,
+            Program program
+    ) {
+
+        if (id == null || program == null) {
+            return Optional.empty();
+        }
+
+        Optional<Program> existingProgram =
+                programRepository.findByIdAndIsActiveTrue(id);
+
+        if (existingProgram.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Program programToUpdate = existingProgram.get();
+
+        programToUpdate.setName(program.getName());
+        programToUpdate.setDegreeLevel(
+                program.getDegreeLevel()
+        );
+        programToUpdate.setDurationYears(
+                program.getDurationYears()
+        );
+
+        if (program.getDepartment() != null
+                && program.getDepartment().getId() > 0) {
+
+            Department department = departmentService
+                    .getDepartmentById(
+                            program.getDepartment().getId()
+                    )
+                    .orElseThrow(
+                            () -> new IllegalArgumentException(
+                                    "Active department not found"
+                            )
+                    );
+
+            programToUpdate.setDepartment(department);
+        }
+
+        programToUpdate.setUpdatedDate(new Date());
+
+        Program updatedProgram =
+                programRepository.save(programToUpdate);
+
+        return Optional.of(updatedProgram);
+    }
 }
