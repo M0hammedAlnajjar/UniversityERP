@@ -65,4 +65,51 @@ public class DepartmentService {
 
         return departmentRepository.findByIdAndIsActiveTrue(id);
     }
+    public Optional<Department> updateDepartment(
+            Long id,
+            Department department
+    ) {
+
+        if (id == null || department == null) {
+            return Optional.empty();
+        }
+
+        Optional<Department> existingDepartment =
+                departmentRepository.findByIdAndIsActiveTrue(id);
+
+        if (existingDepartment.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Department departmentToUpdate =
+                existingDepartment.get();
+
+        departmentToUpdate.setName(department.getName());
+        departmentToUpdate.setDescription(
+                department.getDescription()
+        );
+
+        if (department.getFaculty() != null
+                && department.getFaculty().getId() > 0) {
+
+            Faculty faculty = facultyService
+                    .getFacultyById(
+                            department.getFaculty().getId()
+                    )
+                    .orElseThrow(
+                            () -> new IllegalArgumentException(
+                                    "Active faculty not found"
+                            )
+                    );
+
+            departmentToUpdate.setFaculty(faculty);
+        }
+
+        departmentToUpdate.setUpdatedDate(new Date());
+
+        Department updatedDepartment =
+                departmentRepository.save(departmentToUpdate);
+
+        return Optional.of(updatedDepartment);
+    }
 }
