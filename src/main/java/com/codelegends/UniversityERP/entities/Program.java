@@ -33,4 +33,7 @@ public class Program extends BaseClass{
 
     @OneToMany(mappedBy = "program")
     private List<Student> students = new ArrayList<>();
+
+    @OneToMany(mappedBy = "program")
+    private List<Course> courses = new ArrayList<>();
 }
