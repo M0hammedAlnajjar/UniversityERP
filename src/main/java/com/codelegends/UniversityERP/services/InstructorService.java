@@ -3,7 +3,10 @@ package com.codelegends.UniversityERP.services;
 
 import com.codelegends.UniversityERP.repositories.InstructorRepository;
 import org.springframework.stereotype.Service;
+import com.codelegends.UniversityERP.entities.Department;
+import com.codelegends.UniversityERP.entities.Instructor;
 
+import java.util.Date;
 @Service
 
 public class InstructorService {
@@ -16,5 +19,45 @@ public class InstructorService {
     ) {
         this.instructorRepository = instructorRepository;
         this.departmentService = departmentService;
+    }
+    public Instructor createInstructor(Instructor instructor) {
+
+        if (instructor == null) {
+            throw new IllegalArgumentException(
+                    "Instructor cannot be null"
+            );
+        }
+
+        if (instructorRepository.existsByEmail(
+                instructor.getEmail()
+        )) {
+            throw new IllegalArgumentException(
+                    "Instructor email already exists"
+            );
+        }
+
+        if (instructor.getDepartment() == null
+                || instructor.getDepartment().getId() <= 0) {
+
+            throw new IllegalArgumentException(
+                    "Department ID is required"
+            );
+        }
+
+        Department department = departmentService
+                .getDepartmentById(
+                        instructor.getDepartment().getId()
+                )
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                "Active department not found"
+                        )
+                );
+
+        instructor.setDepartment(department);
+        instructor.setActive(true);
+        instructor.setCreatedDate(new Date());
+
+        return instructorRepository.save(instructor);
     }
 }
