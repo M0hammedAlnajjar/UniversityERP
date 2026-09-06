@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class GradeService {
@@ -92,5 +93,13 @@ public class GradeService {
 
     public List<Grade> getAllGrades() {
         return gradeRepository.findAllByIsActiveTrue();
+    }
+
+    public Optional<Grade> getGradeById(Long id) {
+        if (id == null || id <= 0) {
+            return Optional.empty();
+        }
+
+        return gradeRepository.findByIdAndIsActiveTrue(id);
     }
 }
