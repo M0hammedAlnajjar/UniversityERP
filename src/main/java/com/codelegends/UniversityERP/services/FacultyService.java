@@ -107,5 +107,27 @@ public class FacultyService {
 
         return Optional.of(updatedFaculty);
     }
+    public boolean softDeleteFaculty(Long id) {
+
+        if (id == null) {
+            return false;
+        }
+
+        Optional<Faculty> existingFaculty =
+                facultyRepository.findByIdAndIsActiveTrue(id);
+
+        if (existingFaculty.isEmpty()) {
+            return false;
+        }
+
+        Faculty faculty = existingFaculty.get();
+
+        faculty.setActive(false);
+        faculty.setUpdatedDate(new Date());
+
+        facultyRepository.save(faculty);
+
+        return true;
+    }
 
 }
