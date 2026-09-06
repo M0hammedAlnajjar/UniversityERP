@@ -117,4 +117,26 @@ public class ProgramService {
 
         return Optional.of(updatedProgram);
     }
+    public boolean softDeleteProgram(Long id) {
+
+        if (id == null) {
+            return false;
+        }
+
+        Optional<Program> existingProgram =
+                programRepository.findByIdAndIsActiveTrue(id);
+
+        if (existingProgram.isEmpty()) {
+            return false;
+        }
+
+        Program program = existingProgram.get();
+
+        program.setActive(false);
+        program.setUpdatedDate(new Date());
+
+        programRepository.save(program);
+
+        return true;
+    }
 }
